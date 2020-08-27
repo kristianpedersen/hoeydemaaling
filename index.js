@@ -1,16 +1,12 @@
 const app = require('express')()
+const {exec} = require("child_process")
 const http = require('http').createServer(app)
 const io = require('socket.io')(http)
 const SerialPort = require('serialport')
 const Readline = require('@serialport/parser-readline')
 
-/**
- * From SerialPort.list(), find your microcontroller's path.
- * In my case, my Arduino is connected to COM6, with a baud rate of 9600.
- * If you're using a micro:bit, set the baud rate to 115200, and follow this guide: https://makecode.microbit.org/device/serial
- */
-SerialPort.list().then(p => console.log(p))
-const port = new SerialPort("COM6", { baudRate: 9600 })
+// SerialPort.list().then(p => console.log(p))
+const port = new SerialPort("/dev/ttyACM0", { baudRate: 115200 })
 const parser = new Readline()
 port.pipe(parser)
 
@@ -19,15 +15,11 @@ app.get('/', function serveIndexHtml(req, res) {
 })
 
 io.on('connection', function socketSetup(socket) {
-	// Receive data from browser
-	socket.on("dataFromBrowser", function fromBrowserToSerial(data) {
-		console.log(`Data from browser: ${data}`)
-	})
-
-	// Send data from serial port to browser
 	parser.on('data', function fromSerialToBrowser(line) {
 		io.emit("dataFromNodeJS", line)
+		console.log(line)
 	})
 })
 
 http.listen(3000)
+exec("chromium-browser --noerrdialogs --kiosk --start-fullscreen http://localhost:3000 --incognito --disable-translate", (error, stdout, stderr) => console.log("ey"))

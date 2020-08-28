@@ -11,27 +11,42 @@
 			margin: 0;
 			padding: 0;
 			overflow: hidden;
+			box-sizing: border-box;
 		}
-		
+
 		p#info {
 			font-family: sans-serif;
 			font-size: 300px;
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			height: 100vh;
+			height: 100vw;
 			text-align: center;
 			border: 1px solid;
+			/* overflow: hidden; */
+		}
+
+		.wrapper {
+			transform: rotate(90deg);
+			transform-origin: bottom left;
+			position: absolute;
+			top: -100vw;
+			left: 0;
+			height: 100vw;
+			width: 100vh;
+			overflow: auto;
 		}
 	</style>
 </head>
 
 <body>
-	<p id="info"></p>
+	<div class="wrapper">
+		<p id="info"></p>
+	</div>
 
 	<script src="/socket.io/socket.io.js"></script>
 	<script>
-		const socket = io()
+		// const socket = io()
 		const infoText = document.querySelector("p#info")
 		let height = 0
 		let smoothHeight = 0
@@ -39,19 +54,21 @@
 
 		socket.on("dataFromNodeJS", data => {
 			const n = Number(data)
+
 			if (Number.isInteger(n) && n < 250) {
-				height = data			
+				height = data
 			}
-			
-			infoText.innerHTML = `${Math.round(smoothHeight + ((smoothHeight / 2)/100))} cm`
+
+			infoText.innerHTML = `${Math.round(smoothHeight + ((smoothHeight / 2) / 100))} cm`
 		})
 		
 		function smooth() {
 			smoothHeight += (height - smoothHeight) * 0.05
+			infoText.innerHTML = "180 cm"
 			requestAnimationFrame(smooth)
 		}
-		
-		
+
+
 	</script>
 </body>
 
